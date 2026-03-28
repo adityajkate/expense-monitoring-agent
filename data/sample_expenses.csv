@@ -1,0 +1,420 @@
+date,vendor,amount,description
+2026-01-14,Panera,28.45,Food & Dining expense
+2026-02-24,Internet Provider,386.4,Operations expense
+2026-01-30,Google Ads,1217.99,Marketing expense
+2026-01-22,Azure,2580.33,Cloud services - spike period
+2026-03-16,Adobe Creative Cloud,99.0,Software subscription
+2026-03-05,Facebook Ads,888.43,Marketing expense
+2026-01-14,Uber,446.68,Travel expense
+2026-01-15,Starbucks,39.16,Food & Dining expense
+2026-02-25,AWS,1709.27,Cloud Services expense
+2026-01-02,Office Depot,307.46,Office Expenses expense
+2026-02-11,Panera,67.79,Food & Dining expense
+2026-03-26,Insurance Co,674.78,Operations expense
+2026-03-27,Google Ads,1161.45,Marketing expense
+2026-02-03,Azure,1441.88,Cloud Services expense
+2026-03-26,Uber,149.67,Travel expense
+2026-03-26,Google Ads,633.24,Marketing expense
+2026-03-20,Internet Provider,481.55,Operations expense
+2026-03-25,Panera,51.11,Food & Dining expense
+2026-03-07,Electric Company,590.44,Operations expense
+2026-01-24,Office Depot,588.73,Office Expenses - moderate anomaly
+2026-03-14,Lyft,381.9,Travel expense
+2026-01-28,Office Depot,75.66,Office Expenses expense
+2026-03-17,Chipotle,56.14,Food & Dining expense
+2026-01-21,Office Depot,158.59,Office Expenses expense
+2026-03-01,Google Ads,1351.42,Marketing expense
+2026-02-06,AWS,2367.52,Cloud Services expense
+2026-02-24,Electric Company,453.52,Operations expense
+2026-01-22,GCP,1606.15,Cloud Services expense
+2026-03-08,LinkedIn,747.27,Marketing expense
+2026-03-11,Mailchimp,998.3,Marketing expense
+2026-03-16,Uber,1182.47,Travel - moderate anomaly
+2026-01-29,Mailchimp,743.86,Marketing expense
+2026-01-06,Internet Provider,374.86,Operations expense
+2026-03-21,Azure,2674.68,Cloud services - spike period
+2026-03-23,IKEA,659.51,Office Expenses - moderate anomaly
+2026-02-21,Staples,293.53,Office Expenses expense
+2026-01-19,Subway,44.82,Food & Dining expense
+2026-01-26,Internet Provider,698.69,Operations expense
+2026-02-09,Subway,18.59,Food & Dining expense
+2026-02-13,Starbucks,51.58,Food & Dining expense
+2026-01-10,AWS,2801.96,Cloud Services expense
+2026-02-17,Internet Provider,369.24,Operations expense
+2026-01-10,Mailchimp,3221.71,Marketing - moderate anomaly
+2026-02-03,Starbucks,31.92,Food & Dining expense
+2026-01-08,DigitalOcean,1548.53,Cloud Services expense
+2026-03-03,IKEA,277.09,Office Expenses expense
+2026-01-17,DigitalOcean,1912.29,Cloud Services expense
+2026-02-23,GCP,2353.06,Cloud Services expense
+2026-03-13,AWS,2243.01,Cloud services - spike period
+2026-01-16,Starbucks,71.15,Food & Dining expense
+2026-03-12,Marriott,655.63,Travel expense
+2026-03-10,Office Depot,450.0,Office supplies - DUPLICATE
+2026-01-07,Google Ads,1364.23,Marketing expense
+2026-02-02,Azure,1817.23,Cloud Services expense
+2026-01-08,AWS,3030.11,Cloud services - spike period
+2026-02-14,AWS,1409.83,Cloud Services expense
+2026-01-24,Electric Company,473.55,Operations expense
+2026-03-23,GCP,2457.56,Cloud services - spike period
+2026-02-08,Lyft,362.0,Travel expense
+2026-03-25,Subway,17.26,Food & Dining expense
+2026-03-11,Slack,149.0,Software subscription
+2026-01-07,Starbucks,53.63,Food & Dining expense
+2026-02-28,Delta Airlines,296.64,Travel expense
+2026-03-14,Azure,3624.18,Cloud services - spike period
+2026-02-04,Insurance Co,451.66,Operations expense
+2026-01-26,Marriott,144.82,Travel expense
+2026-02-07,LinkedIn,3039.8,Marketing - moderate anomaly
+2026-01-20,AWS,2238.5,Cloud Services expense
+2026-02-23,GCP,4157.76,Cloud services - spike period
+2026-03-07,Facebook Ads,977.55,Marketing expense
+2026-03-01,Subway,15.93,Food & Dining expense
+2026-01-05,Marriott,506.18,Travel expense
+2026-01-21,Azure,3260.32,Cloud services - spike period
+2026-01-15,Staples,181.26,Office Expenses expense
+2026-01-26,Subway,36.8,Food & Dining expense
+2026-03-17,Internet Provider,462.32,Operations expense
+2026-01-10,Chipotle,100.74,Food & Dining expense
+2026-02-12,Internet Provider,585.74,Operations expense
+2026-02-22,Staples,135.39,Office Expenses expense
+2026-01-01,Office Depot,809.68,Office Expenses - moderate anomaly
+2026-03-23,Subway,33.34,Food & Dining expense
+2026-02-14,Adobe Creative Cloud,99.0,Software subscription
+2026-01-29,Insurance Co,442.98,Operations expense
+2026-01-10,Uber,508.58,Travel expense
+2026-02-14,Electric Company,550.32,Operations expense
+2026-03-10,IKEA,207.26,Office Expenses expense
+2026-03-25,Electric Company,582.63,Operations expense
+2026-01-19,Mailchimp,1063.77,Marketing expense
+2026-01-25,Mailchimp,1033.81,Marketing expense
+2026-03-08,Panera,156.97,Food & Dining - moderate anomaly
+2026-03-01,Panera,27.05,Food & Dining expense
+2026-03-01,Marriott,115.9,Travel expense
+2026-01-13,Azure,3094.29,Cloud services - spike period
+2026-01-07,Azure,1485.06,Cloud Services expense
+2026-01-10,Starbucks,51.68,Food & Dining expense
+2026-02-16,Uber,285.82,Travel expense
+2026-01-19,Internet Provider,545.4,Operations expense
+2026-02-12,Panera,85.97,Food & Dining expense
+2026-02-21,Azure,2323.39,Cloud services - spike period
+2026-02-05,Azure,2636.86,Cloud services - spike period
+2026-03-05,Marriott,141.63,Travel expense
+2026-01-20,AWS,3820.37,Cloud services - spike period
+2026-01-09,Azure,2955.72,Cloud services - spike period
+2026-03-02,Marriott,346.61,Travel expense
+2026-03-13,Staples,239.11,Office Expenses expense
+2026-03-17,Staples,118.16,Office Expenses expense
+2026-01-19,Panera,61.21,Food & Dining expense
+2026-02-05,Internet Provider,379.9,Operations expense
+2026-01-15,Staples,223.24,Office Expenses expense
+2026-02-13,Panera,59.06,Food & Dining expense
+2026-01-24,Azure,2105.58,Cloud Services expense
+2026-03-20,Electric Company,458.34,Operations expense
+2026-02-23,Panera,46.3,Food & Dining expense
+2026-01-15,Airbnb,54.55,Travel expense
+2026-03-13,Marriott,531.84,Travel expense
+2026-02-21,Starbucks,45.93,Food & Dining expense
+2026-03-07,Staples,292.22,Office Expenses expense
+2026-01-10,GCP,1886.06,Cloud Services expense
+2026-01-21,Staples,236.92,Office Expenses expense
+2026-01-25,LinkedIn,1228.38,Marketing expense
+2026-03-05,Facebook Ads,708.88,Marketing expense
+2026-03-08,Internet Provider,404.15,Operations expense
+2026-03-18,Delta Airlines,361.57,Travel expense
+2026-01-10,Facebook Ads,717.07,Marketing expense
+2026-01-15,AWS,1975.69,Cloud Services expense
+2026-02-16,Office Depot,198.89,Office Expenses expense
+2026-02-15,Azure,1279.51,Cloud Services expense
+2026-01-30,AWS,3559.44,Cloud services - spike period
+2026-03-01,Uber,318.74,Travel expense
+2026-01-07,Staples,123.4,Office Expenses expense
+2026-01-12,DigitalOcean,1647.74,Cloud Services expense
+2026-02-27,Internet Provider,646.48,Operations expense
+2026-02-14,AWS,1507.14,Cloud Services expense
+2026-03-13,Delta Airlines,395.92,Travel expense
+2026-02-23,Facebook Ads,3183.14,Marketing - moderate anomaly
+2026-01-15,Adobe Creative Cloud,99.0,Software subscription
+2026-01-02,Marriott,191.17,Travel expense
+2026-02-20,Chipotle,40.32,Food & Dining expense
+2026-02-24,AWS,1106.82,Cloud Services expense
+2026-01-31,LinkedIn,1079.61,Marketing expense
+2026-03-03,Staples,229.88,Office Expenses expense
+2026-03-19,Starbucks,10.0,Food & Dining expense
+2026-03-27,Office Depot,208.83,Office Expenses expense
+2026-02-16,Google Ads,949.49,Marketing expense
+2026-01-25,Airbnb,274.45,Travel expense
+2026-01-10,GCP,3133.38,Cloud services - spike period
+2026-03-25,Internet Provider,477.9,Operations expense
+2026-01-11,Uber,525.79,Travel expense
+2026-03-11,Staples,149.48,Office Expenses expense
+2026-03-11,Starbucks,67.86,Food & Dining expense
+2026-02-12,Chipotle,41.26,Food & Dining expense
+2026-03-04,IKEA,232.17,Office Expenses expense
+2026-02-12,Staples,385.26,Office Expenses expense
+2026-01-29,DigitalOcean,2205.46,Cloud Services expense
+2026-02-19,Zoom,199.0,Software subscription
+2026-01-19,Staples,40.63,Office Expenses expense
+2026-01-02,Panera,16.09,Food & Dining expense
+2026-03-13,Chipotle,52.9,Food & Dining expense
+2026-03-05,Electric Company,388.78,Operations expense
+2026-03-10,Office Depot,450.0,Office supplies
+2026-03-20,Internet Provider,633.27,Operations expense
+2026-03-03,Panera,38.9,Food & Dining expense
+2026-01-01,Internet Provider,414.04,Operations expense
+2026-03-08,GCP,1892.29,Cloud Services expense
+2026-01-28,AWS,1487.48,Cloud Services expense
+2026-01-07,Insurance Co,581.91,Operations expense
+2026-01-16,Airbnb,605.37,Travel expense
+2026-01-24,Internet Provider,509.9,Operations expense
+2026-01-26,Google Ads,612.79,Marketing expense
+2026-02-13,Uber,496.81,Travel expense
+2026-01-21,DigitalOcean,2327.03,Cloud Services expense
+2026-03-25,Subway,50.78,Food & Dining expense
+2026-01-14,Facebook Ads,373.86,Marketing expense
+2026-02-24,Insurance Co,585.71,Operations expense
+2026-02-09,DigitalOcean,1912.67,Cloud Services expense
+2026-01-25,Insurance Co,480.02,Operations expense
+2026-01-24,Office Depot,28.97,Office Expenses expense
+2026-01-08,IKEA,729.09,Office Expenses - moderate anomaly
+2026-01-12,Staples,10.0,Office Expenses expense
+2026-01-11,Azure,3364.57,Cloud services - spike period
+2026-03-27,Subway,73.34,Food & Dining expense
+2026-01-03,Azure,2619.21,Cloud services - spike period
+2026-02-06,Insurance Co,1676.28,Operations - moderate anomaly
+2026-01-23,AWS,3227.45,Cloud services - spike period
+2026-03-26,IKEA,97.47,Office Expenses expense
+2026-02-11,Mailchimp,821.25,Marketing expense
+2026-01-01,Marriott,648.83,Travel expense
+2026-02-13,Starbucks,74.28,Food & Dining expense
+2026-01-19,IKEA,10.0,Office Expenses expense
+2026-03-27,Facebook Ads,704.84,Marketing expense
+2026-01-31,Chipotle,44.44,Food & Dining expense
+2026-01-02,Facebook Ads,630.58,Marketing expense
+2026-02-22,Insurance Co,571.75,Operations expense
+2026-01-09,GCP,1832.64,Cloud Services expense
+2026-02-25,Electric Company,445.04,Operations expense
+2026-02-11,IKEA,185.86,Office Expenses expense
+2026-01-04,Staples,253.96,Office Expenses expense
+2026-02-04,Airbnb,568.64,Travel expense
+2026-02-13,AWS,1770.41,Cloud Services expense
+2026-01-06,Chipotle,67.76,Food & Dining expense
+2026-03-03,DigitalOcean,1981.9,Cloud Services expense
+2026-02-22,Internet Provider,516.27,Operations expense
+2026-02-27,Panera,85.5,Food & Dining expense
+2026-02-13,Electric Company,416.66,Operations expense
+2026-02-27,Delta Airlines,358.49,Travel expense
+2026-02-20,Uber,503.42,Travel expense
+2026-01-29,Mailchimp,1167.61,Marketing expense
+2026-03-10,Delta Airlines,331.63,Travel expense
+2026-01-24,Subway,27.81,Food & Dining expense
+2026-01-01,Subway,44.86,Food & Dining expense
+2026-02-12,LinkedIn,814.74,Marketing expense
+2026-01-26,GCP,3082.64,Cloud services - spike period
+2026-01-07,Chipotle,67.56,Food & Dining expense
+2026-01-01,Chipotle,66.5,Food & Dining expense
+2026-01-13,Chipotle,68.81,Food & Dining expense
+2026-01-06,Internet Provider,539.37,Operations expense
+2026-03-25,AWS,2325.78,Cloud Services expense
+2026-03-01,Facebook Ads,1255.9,Marketing expense
+2026-02-04,Airbnb,423.57,Travel expense
+2026-01-10,Slack,149.0,Software subscription
+2026-01-14,Electric Company,596.77,Operations expense
+2026-02-28,Electric Company,508.3,Operations expense
+2026-02-09,Slack,149.0,Software subscription
+2026-02-09,Lyft,46.96,Travel expense
+2026-02-19,IKEA,87.16,Office Expenses expense
+2026-02-28,GCP,3550.4,Cloud services - spike period
+2026-02-20,Mailchimp,1055.38,Marketing expense
+2026-03-10,Internet Provider,500.01,Operations expense
+2026-02-25,Internet Provider,308.63,Operations expense
+2026-01-27,Subway,53.95,Food & Dining expense
+2026-02-09,AWS,1770.83,Cloud Services expense
+2026-03-16,Marriott,562.92,Travel expense
+2026-02-22,Starbucks,30.97,Food & Dining expense
+2026-02-22,Azure,2191.69,Cloud Services expense
+2026-03-07,Insurance Co,595.15,Operations expense
+2026-02-13,Electric Company,625.4,Operations expense
+2026-03-11,Azure,2588.11,Cloud services - spike period
+2026-02-26,Lyft,351.98,Travel expense
+2026-03-25,LinkedIn,520.23,Marketing expense
+2026-03-15,AWS,18000.0,Cloud hosting - UNUSUAL SPIKE
+2026-02-05,AWS,3152.72,Cloud services - spike period
+2026-02-14,Chipotle,10.0,Food & Dining expense
+2026-02-05,Delta Airlines,366.92,Travel expense
+2026-03-09,Azure,1715.04,Cloud Services expense
+2026-02-02,Azure,2897.07,Cloud services - spike period
+2026-01-22,AWS,2511.59,Cloud Services expense
+2026-01-25,Marriott,3200.0,Hotel stay - UNUSUAL
+2026-02-18,Azure,2892.29,Cloud services - spike period
+2026-03-15,Marriott,361.09,Travel expense
+2026-01-13,GCP,3640.09,Cloud services - spike period
+2026-01-09,IKEA,13.09,Office Expenses expense
+2026-02-26,Mailchimp,985.25,Marketing expense
+2026-02-18,Airbnb,372.39,Travel expense
+2026-02-05,DigitalOcean,1388.62,Cloud Services expense
+2026-02-14,Delta Airlines,80.63,Travel expense
+2026-01-11,Insurance Co,460.58,Operations expense
+2026-01-05,Starbucks,31.64,Food & Dining expense
+2026-01-08,Uber,225.59,Travel expense
+2026-01-04,Subway,40.39,Food & Dining expense
+2026-01-14,IKEA,10.0,Office Expenses expense
+2026-01-29,Uber,262.62,Travel expense
+2026-03-07,GCP,2401.21,Cloud services - spike period
+2026-01-20,GCP,2823.15,Cloud services - spike period
+2026-03-12,Google Ads,857.91,Marketing expense
+2026-03-01,Google Ads,534.57,Marketing expense
+2026-02-01,Subway,40.24,Food & Dining expense
+2026-02-07,Azure,2928.09,Cloud services - spike period
+2026-02-20,Azure,2464.9,Cloud Services expense
+2026-01-02,Staples,227.42,Office Expenses expense
+2026-03-06,Facebook Ads,905.42,Marketing expense
+2026-01-08,Azure,3462.32,Cloud services - spike period
+2026-03-28,Starbucks,16.53,Food & Dining expense
+2026-02-17,Chipotle,68.62,Food & Dining expense
+2026-01-17,LinkedIn,449.01,Marketing expense
+2026-03-21,Marriott,198.65,Travel expense
+2026-03-06,Staples,135.1,Office Expenses expense
+2026-01-21,Panera,28.52,Food & Dining expense
+2026-02-23,Staples,182.98,Office Expenses expense
+2026-03-07,Office Depot,345.24,Office Expenses expense
+2026-01-16,Electric Company,364.17,Operations expense
+2026-01-02,AWS,1169.52,Cloud Services expense
+2026-01-14,DigitalOcean,1288.84,Cloud Services expense
+2026-03-13,Electric Company,483.01,Operations expense
+2026-03-05,Google Ads,912.65,Marketing expense
+2026-01-21,Airbnb,225.55,Travel expense
+2026-01-14,Staples,261.69,Office Expenses expense
+2026-01-13,Google Ads,1254.74,Marketing expense
+2026-01-02,AWS,3086.69,Cloud services - spike period
+2026-01-23,Lyft,210.05,Travel expense
+2026-03-20,AWS,1250.16,Cloud Services expense
+2026-02-03,AWS,1771.92,Cloud Services expense
+2026-01-19,Electric Company,444.17,Operations expense
+2026-01-19,Internet Provider,560.93,Operations expense
+2026-01-09,IKEA,296.59,Office Expenses expense
+2026-03-01,Office Depot,153.65,Office Expenses expense
+2026-03-21,Electric Company,1815.89,Operations - moderate anomaly
+2026-01-30,Marriott,143.3,Travel expense
+2026-01-02,IKEA,194.37,Office Expenses expense
+2026-03-10,GCP,2915.47,Cloud services - spike period
+2026-02-13,IKEA,169.57,Office Expenses expense
+2026-03-10,Office Depot,239.19,Office Expenses expense
+2026-03-21,Zoom,199.0,Software subscription
+2026-01-21,Facebook Ads,353.51,Marketing expense
+2026-01-04,Office Depot,146.0,Office Expenses expense
+2026-01-30,Azure,1987.7,Cloud Services expense
+2026-03-13,Azure,1941.23,Cloud Services expense
+2026-03-24,Delta Airlines,361.28,Travel expense
+2026-02-03,Facebook Ads,1046.21,Marketing expense
+2026-02-19,Chipotle,67.79,Food & Dining expense
+2026-02-21,Electric Company,692.48,Operations expense
+2026-01-30,Starbucks,42.21,Food & Dining expense
+2026-03-03,Electric Company,502.17,Operations expense
+2026-02-17,AWS,3743.08,Cloud services - spike period
+2026-03-20,Chipotle,68.61,Food & Dining expense
+2026-03-17,IKEA,71.61,Office Expenses expense
+2026-03-20,Office Depot,251.0,Office Expenses expense
+2026-02-13,Airbnb,10.0,Travel expense
+2026-02-09,Panera,10.0,Food & Dining expense
+2026-03-23,Insurance Co,761.65,Operations expense
+2026-01-20,Zoom,199.0,Software subscription
+2026-03-01,Marriott,17.17,Travel expense
+2026-03-14,DigitalOcean,1359.73,Cloud Services expense
+2026-02-18,Delta Airlines,278.77,Travel expense
+2026-03-17,Chipotle,58.89,Food & Dining expense
+2026-03-28,Office Depot,205.45,Office Expenses expense
+2026-03-19,Azure,1480.61,Cloud Services expense
+2026-01-01,LinkedIn,1292.49,Marketing expense
+2026-01-25,Insurance Co,418.69,Operations expense
+2026-01-14,Starbucks,48.97,Food & Dining expense
+2026-01-12,DigitalOcean,1686.1,Cloud Services expense
+2026-03-02,GCP,2208.29,Cloud services - spike period
+2026-02-12,LinkedIn,1409.69,Marketing expense
+2026-03-24,Insurance Co,501.49,Operations expense
+2026-01-30,Insurance Co,548.79,Operations expense
+2026-01-24,Azure,3521.12,Cloud services - spike period
+2026-03-13,Google Ads,1132.17,Marketing expense
+2026-03-24,Starbucks,54.18,Food & Dining expense
+2026-03-10,IKEA,116.96,Office Expenses expense
+2026-01-04,LinkedIn,762.09,Marketing expense
+2026-01-11,GCP,3151.56,Cloud services - spike period
+2026-03-21,Starbucks,66.52,Food & Dining expense
+2026-03-23,Chipotle,160.88,Food & Dining - moderate anomaly
+2026-03-21,GCP,2510.56,Cloud services - spike period
+2026-02-23,DigitalOcean,2455.59,Cloud Services expense
+2026-02-05,Chipotle,61.53,Food & Dining expense
+2026-03-24,Mailchimp,935.61,Marketing expense
+2026-02-10,Internet Provider,437.42,Operations expense
+2026-02-02,Airbnb,97.6,Travel expense
+2026-02-18,IKEA,140.86,Office Expenses expense
+2026-02-17,Azure,1901.33,Cloud Services expense
+2026-02-22,Insurance Co,433.6,Operations expense
+2026-01-09,Chipotle,46.54,Food & Dining expense
+2026-01-20,Office Depot,186.87,Office Expenses expense
+2026-01-09,Delta Airlines,286.7,Travel expense
+2026-01-13,Starbucks,55.36,Food & Dining expense
+2026-03-17,Google Ads,1142.24,Marketing expense
+2026-03-14,Airbnb,43.22,Travel expense
+2026-02-27,Internet Provider,389.24,Operations expense
+2026-02-11,Lyft,10.0,Travel expense
+2026-02-23,Electric Company,465.24,Operations expense
+2026-03-01,Mailchimp,1184.33,Marketing expense
+2026-02-08,Uber,540.8,Travel expense
+2026-02-19,Marriott,586.21,Travel expense
+2026-02-22,GCP,1597.63,Cloud Services expense
+2026-01-08,Insurance Co,426.72,Operations expense
+2026-03-24,Mailchimp,931.63,Marketing expense
+2026-03-18,Chipotle,49.25,Food & Dining expense
+2026-01-29,Azure,1342.79,Cloud Services expense
+2026-01-26,IKEA,346.9,Office Expenses expense
+2026-01-25,Google Ads,912.28,Marketing expense
+2026-03-14,Insurance Co,620.71,Operations expense
+2026-01-12,Facebook Ads,1119.35,Marketing expense
+2026-02-12,Insurance Co,1782.97,Operations - moderate anomaly
+2026-03-19,Insurance Co,558.12,Operations expense
+2026-02-25,GCP,916.97,Cloud Services expense
+2026-02-20,Facebook Ads,8500.0,Marketing campaign - UNUSUAL
+2026-01-29,Uber,417.04,Travel expense
+2026-01-19,Office Depot,159.16,Office Expenses expense
+2026-01-31,Subway,45.0,Food & Dining expense
+2026-01-01,GCP,2854.14,Cloud services - spike period
+2026-02-16,Panera,70.85,Food & Dining expense
+2026-01-24,Office Depot,227.9,Office Expenses expense
+2026-03-11,Panera,26.53,Food & Dining expense
+2026-03-15,Mailchimp,3010.82,Marketing - moderate anomaly
+2026-02-18,Google Ads,683.0,Marketing expense
+2026-02-12,Internet Provider,493.25,Operations expense
+2026-03-02,Uber,172.52,Travel expense
+2026-03-10,Mailchimp,641.53,Marketing expense
+2026-02-23,Electric Company,512.81,Operations expense
+2026-02-08,Internet Provider,434.26,Operations expense
+2026-02-28,Subway,10.0,Food & Dining expense
+2026-03-01,DigitalOcean,1518.57,Cloud Services expense
+2026-02-01,Lyft,694.73,Travel expense
+2026-03-05,Office Depot,67.41,Office Expenses expense
+2026-01-06,LinkedIn,470.56,Marketing expense
+2026-01-20,IKEA,269.65,Office Expenses expense
+2026-03-21,GCP,2431.38,Cloud services - spike period
+2026-03-20,GCP,1357.91,Cloud Services expense
+2026-02-21,Internet Provider,503.06,Operations expense
+2026-01-09,Staples,258.83,Office Expenses expense
+2026-03-15,Subway,17.63,Food & Dining expense
+2026-03-03,GCP,1263.26,Cloud Services expense
+2026-01-13,Marriott,383.99,Travel expense
+2026-03-26,Marriott,428.85,Travel expense
+2026-03-27,GCP,3097.67,Cloud services - spike period
+2026-03-11,DigitalOcean,2434.76,Cloud Services expense
+2026-03-27,Azure,3231.67,Cloud services - spike period
+2026-02-18,LinkedIn,767.26,Marketing expense
+2026-03-03,DigitalOcean,2017.0,Cloud Services expense
+2026-03-20,Marriott,644.95,Travel expense
+2026-03-05,Google Ads,286.34,Marketing expense
+2026-03-27,Lyft,1251.17,Travel - moderate anomaly
+2026-03-03,Chipotle,37.82,Food & Dining expense
+2026-02-06,Panera,72.65,Food & Dining expense
+2026-01-19,Lyft,121.27,Travel expense
+2026-03-19,Staples,162.73,Office Expenses expense
+2026-01-03,IKEA,201.14,Office Expenses expense
+2026-03-18,GCP,1410.43,Cloud Services expense
+2026-03-01,Electric Company,424.39,Operations expense

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpendGuard AI - Autonomous Expense Monitoring</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <div class="logo-wrapper">
+                    <div class="logo-icon">
+                        <i data-lucide="shield-check" stroke-width="2.5"></i>
+                    </div>
+                    <span class="logo-text">SpendGuard</span>
+                </div>
+            </div>
+            <div class="nav-actions">
+                <input type="file" id="csvFile" accept=".csv" style="display: none;">
+                <input type="file" id="invoiceFile" accept=".pdf,.jpg,.jpeg,.png,.tiff" style="display: none;">
+                <button id="uploadBtn" class="btn-nav">
+                    <i data-lucide="upload" size="16"></i>
+                    <span>Upload CSV</span>
+                </button>
+                <button id="uploadInvoiceBtn" class="btn-nav" style="margin-left: 10px;">
+                    <i data-lucide="file-text" size="16"></i>
+                    <span>Upload Invoice</span>
+                </button>
+                <span id="uploadStatus" class="upload-status"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero / Empty State -->
+        <div id="emptyState" class="hero-section">
+            <div class="hero-background">
+                <div class="gradient-orb orb-1"></div>
+                <div class="gradient-orb orb-2"></div>
+                <div class="gradient-orb orb-3"></div>
+            </div>
+
+            <div class="container">
+                <div class="hero-grid">
+                    <div class="hero-content">
+                        <div class="hero-badge">
+                            <span class="badge-dot"></span>
+                            <span>Powered by Advanced AI</span>
+                        </div>
+
+                        <h1 class="hero-title">
+                            Stop overspending.<br/>
+                            Start <span class="gradient-text">saving</span>.
+                        </h1>
+
+                        <p class="hero-subtitle">
+                            SpendGuard AI analyzes your company expenses in real-time, detects anomalies before they become problems, and recommends cost-saving actions all on autopilot.
+                        </p>
+
+                        <div class="hero-cta">
+                            <button class="btn-primary btn-hero" onclick="document.getElementById('uploadBtn').click()">
+                                <span>Start Analyzing</span>
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <button class="btn-secondary btn-hero" onclick="document.querySelector('.features-section').scrollIntoView({behavior: 'smooth'})">
+                                Learn More
+                            </button>
+                        </div>
+
+                        <div class="trust-indicators">
+                            <div class="trust-item">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M9 12L11 14L15 10" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <circle cx="10" cy="10" r="9" stroke="#10B981" stroke-width="2"/>
+                                </svg>
+                                <span>No signup required</span>
+                            </div>
+                            <div class="trust-item">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M9 12L11 14L15 10" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <circle cx="10" cy="10" r="9" stroke="#10B981" stroke-width="2"/>
+                                </svg>
+                                <span>Free analysis</span>
+                            </div>
+                            <div class="trust-item">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M9 12L11 14L15 10" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <circle cx="10" cy="10" r="9" stroke="#10B981" stroke-width="2"/>
+                                </svg>
+                                <span>Results in seconds</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hero-visual">
+                        <div class="dashboard-preview">
+                            <div class="preview-header">
+                                <div class="preview-dots">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                                <div class="preview-title">Dashboard Preview</div>
+                            </div>
+
+                            <div class="preview-content">
+                                <div class="preview-card card-anomaly">
+                                    <div class="card-label">
+                                        <span class="status-dot red"></span>
+                                        High-Risk Transaction
+                                    </div>
+                                    <div class="card-main">
+                                        <div class="card-vendor">AWS Cloud Services</div>
+                                        <div class="card-amount">$18,450</div>
+                                    </div>
+                                    <div class="card-tag danger">Requires Review</div>
+                                </div>
+
+                                <div class="preview-card card-savings">
+                                    <div class="card-label">
+                                        <span class="status-dot green"></span>
+                                        Potential Savings
+                                    </div>
+                                    <div class="card-main">
+                                        <div class="savings-big">$73,248</div>
+                                        <div class="savings-sub">Annual cost reduction identified</div>
+                                    </div>
+                                </div>
+
+                                <div class="preview-metrics">
+                                    <div class="metric-mini">
+                                        <div class="metric-label">Anomalies</div>
+                                        <div class="metric-value">17</div>
+                                    </div>
+                                    <div class="metric-mini">
+                                        <div class="metric-label">Categories</div>
+                                        <div class="metric-value">8</div>
+                                    </div>
+                                    <div class="metric-mini">
+                                        <div class="metric-label">Actions</div>
+                                        <div class="metric-value">12</div>
+                                    </div>
+                                </div>
+
+                                <div class="preview-chart">
+                                    <div class="chart-bars">
+                                        <div class="bar" style="height: 60%"></div>
+                                        <div class="bar" style="height: 85%"></div>
+                                        <div class="bar" style="height: 45%"></div>
+                                        <div class="bar" style="height: 70%"></div>
+                                        <div class="bar" style="height: 55%"></div>
+                                        <div class="bar" style="height: 90%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="floating-badge badge-1">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M8 2L2 5L8 8L14 5L8 2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M2 11L8 14L14 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M2 8L8 11L14 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span>3-Layer Detection</span>
+                        </div>
+
+                        <div class="floating-badge badge-2">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M8 2V14M8 2L4 6M8 2L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span>Real-time Analysis</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Bar -->
+                <div class="stats-bar">
+                    <div class="stat-block">
+                        <div class="stat-number">419</div>
+                        <div class="stat-text">Transactions Analyzed</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-block">
+                        <div class="stat-number">7.3s</div>
+                        <div class="stat-text">Average Processing Time</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-block">
+                        <div class="stat-number">98.5%</div>
+                        <div class="stat-text">Detection Accuracy</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-block">
+                        <div class="stat-number">$73K+</div>
+                        <div class="stat-text">Avg. Savings Found</div>
+                    </div>
+                </div>
+
+                <!-- Features Section -->
+                <div class="features-section">
+                    <div class="section-header">
+                        <div class="section-badge">Features</div>
+                        <h2>Everything you need to control spending</h2>
+                        <p>Powerful AI-driven insights that help finance teams make smarter decisions</p>
+                    </div>
+
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <h3>Multi-Layer Detection</h3>
+                            <p>Three-tier anomaly detection system identifies unusual patterns across global outliers, category-specific trends, and historical deviations.</p>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <h3>Real-Time Analysis</h3>
+                            <p>Process thousands of transactions in seconds. Get instant insights, visualizations, and actionable recommendations without delays.</p>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path d="M21 16V8C21 6.89543 20.1046 6 19 6H5C3.89543 6 3 6.89543 3 8V16C3 17.1046 3.89543 18 5 18H19C20.1046 18 21 17.1046 21 16Z" stroke="currentColor" stroke-width="2"/>
+                                    <circle cx="12" cy="12" r="2" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                            </div>
+                            <h3>Subscription Tracking</h3>
+                            <p>Automatically detect recurring charges and calculate annual costs. Identify unused subscriptions and eliminate unnecessary spending.</p>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <h3>Cost Spike Alerts</h3>
+                            <p>Get notified when spending in any category exceeds baseline thresholds. Catch budget overruns before they impact your bottom line.</p>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path d="M9 11L12 14L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M21 12V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <h3>One-Click Actions</h3>
+                            <p>AI recommends specific actions you can execute instantly. Flag high-risk transactions, optimize spending, or review subscriptions with one click.</p>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M9 3V21" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M15 9V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <h3>Smart Categorization</h3>
+                            <p>Automatically categorize transactions across 8 spending categories using intelligent keyword matching and machine learning algorithms.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CTA Section -->
+                <div class="cta-section">
+                    <div class="cta-content">
+                        <h2>Ready to take control of your spending?</h2>
+                        <p>Upload your expense data and get instant AI-powered insights</p>
+                        <button class="btn-primary btn-hero" onclick="document.getElementById('uploadBtn').click()">
+                            <span>Start Free Analysis</span>
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Content (hidden initially) -->
+        <div id="dashboardContent" style="display: none;">
+            <div class="container">
+                <!-- Section 1: Key Metrics -->
+                <section id="keyMetrics" class="metrics-section">
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <h3>Total Spend</h3>
+                            <p class="metric-value" id="totalSpend">$0</p>
+                        </div>
+                        <div class="metric-card">
+                            <h3>Anomalies Detected</h3>
+                            <p class="metric-value" id="anomalyCount">0</p>
+                            <p class="metric-subtitle" id="anomalyPercent">0%</p>
+                        </div>
+                        <div class="metric-card">
+                            <h3>Categories Tracked</h3>
+                            <p class="metric-value" id="categoriesCount">0</p>
+                        </div>
+                        <div class="metric-card">
+                            <h3>High-Risk Transactions</h3>
+                            <p class="metric-value" id="highRiskCount">0</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 2: Insights Panel -->
+                <section id="insightsSection">
+                    <h2>Key Insights</h2>
+                    <div id="insightsPanel" class="insights-grid">
+                        <!-- Insights will be dynamically added here -->
+                    </div>
+                    <div id="noInsights" class="empty-message" style="display: none;">
+                        No significant patterns found
+                    </div>
+                </section>
+
+                <!-- Section 3: Recommended Actions -->
+                <section id="actionsSection">
+                    <h2>Recommended Actions</h2>
+                    <div id="actionsPanel" class="actions-grid">
+                        <!-- Actions will be dynamically added here -->
+                    </div>
+                    <div id="noActions" class="empty-message" style="display: none;">
+                        No actions required
+                    </div>
+                </section>
+
+                <!-- Section 4: Spend Breakdown Charts -->
+                <section id="chartsSection">
+                    <h2>Spend Breakdown</h2>
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <h3>Spend by Category</h3>
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h3>Top 10 Vendors</h3>
+                            <canvas id="vendorChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 5: Anomalies Table -->
+                <section id="anomaliesSection">
+                    <h2>Detected Anomalies</h2>
+                    <div class="table-controls">
+                        <button id="toggleAnomalies" class="btn-secondary">Show All Transactions</button>
+                    </div>
+                    <div class="table-container">
+                        <table id="anomaliesTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Vendor</th>
+                                    <th>Amount</th>
+                                    <th>Category</th>
+                                    <th>Score</th>
+                                    <th>Confidence</th>
+                                    <th>Reasons</th>
+                                </tr>
+                            </thead>
+                            <tbody id="anomaliesTableBody">
+                                <!-- Anomalies will be dynamically added here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="noAnomalies" class="empty-message" style="display: none;">
+                        No anomalies detected
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>
