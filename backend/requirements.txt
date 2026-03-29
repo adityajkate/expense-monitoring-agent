@@ -3,3 +3,10 @@ pandas
 scikit-learn
 uvicorn[standard]
 python-multipart
+spacy
+pytesseract
+pdf2image
+Pillow
+numpy
+opencv-python
+python-dateutil

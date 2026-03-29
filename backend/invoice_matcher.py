@@ -185,10 +185,10 @@ class InvoiceMatcher:
         discrepancies = []
 
         # Amount matching (40% weight)
-        invoice_amount = invoice.get('amounts', {}).get('total', 0)
+        invoice_amount = invoice.get('amounts', {}).get('total') or 0
         txn_amount = transaction['amount']
         amount_diff = abs(invoice_amount - txn_amount)
-        amount_diff_pct = amount_diff / invoice_amount if invoice_amount > 0 else 1.0
+        amount_diff_pct = amount_diff / invoice_amount if invoice_amount and invoice_amount > 0 else 1.0
 
         amount_match = amount_diff_pct <= self.amount_tolerance_pct
 

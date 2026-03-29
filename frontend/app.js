@@ -5,6 +5,8 @@ const API_BASE = 'http://localhost:8000';
 let dashboardData = null;
 let categoryChart = null;
 let vendorChart = null;
+let allTransactions = [];
+let showingAllTransactions = false;
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', async () => {
@@ -33,19 +35,6 @@ function setupEventListeners() {
     document.getElementById('invoiceFile').addEventListener('change', handleInvoiceUpload);
 
     document.getElementById('toggleAnomalies').addEventListener('click', toggleAnomaliesView);
-
-    // Add invoice upload handler
-    const invoiceBtn = document.getElementById('uploadInvoiceBtn');
-    if (invoiceBtn) {
-        invoiceBtn.addEventListener('click', () => {
-            document.getElementById('invoiceFile').click();
-        });
-    }
-
-    const invoiceFile = document.getElementById('invoiceFile');
-    if (invoiceFile) {
-        invoiceFile.addEventListener('change', handleInvoiceUpload);
-    }
 
     // Navbar scroll effect
     let lastScrollY = window.scrollY;
@@ -93,22 +82,22 @@ async function handleInvoiceUpload(event) {
         const result = await response.json();
 
         if (result.status === 'already_processed') {
-            uploadStatus.textContent = `✓ Invoice already processed`;
+            uploadStatus.textContent = 'Invoice already processed';
             alert('This invoice was already processed.');
         } else {
-            uploadStatus.textContent = `✓ Invoice processed: ${result.invoice_data.vendor} - $${result.invoice_data.amounts.total} (${(result.invoice_data.confidence * 100).toFixed(0)}% confidence)`;
+            const total = result.invoice_data.amounts.total || 0;
+            const confidence = result.invoice_data.confidence || 0;
+            uploadStatus.textContent = `Invoice processed: ${result.invoice_data.vendor} - $${total.toFixed ? total.toFixed(2) : '0.00'} (${(confidence * 100).toFixed(0)}% confidence)`;
 
             // Show extracted data
             showInvoiceModal(result.invoice_data);
 
-            // Reload dashboard if data exists
-            if (dashboardData) {
-                await loadDashboard();
-            }
+            // Reload dashboard to show new transaction
+            await loadDashboard();
         }
 
     } catch (error) {
-        uploadStatus.textContent = `✗ Error: ${error.message}`;
+        uploadStatus.textContent = `Error: ${error.message}`;
         console.error('Invoice upload error:', error);
 
         // Check if Tesseract error
@@ -116,6 +105,8 @@ async function handleInvoiceUpload(event) {
             alert('Tesseract OCR is not installed. Please install it first.\n\nSee TESSERACT_INSTALL.md for instructions.');
         }
     }
+
+    event.target.value = '';
 }
 
 // Show invoice extraction results in modal
@@ -136,62 +127,102 @@ function showInvoiceModal(invoiceData) {
 
     const content = document.createElement('div');
     content.style.cssText = `
-        background: white;
-        padding: 30px;
-        border-radius: 10px;
-        max-width: 600px;
-        max-height: 80vh;
+        background: #0A0A0A;
+        border: 1px solid #1A1A1A;
+        border-radius: 12px;
+        padding: 40px;
+        max-width: 900px;
+        width: 100%;
+        max-height: 85vh;
         overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     `;
 
     const lineItemsHtml = invoiceData.line_items && invoiceData.line_items.length > 0
         ? `
-            <h3>Line Items:</h3>
-            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-                <thead>
-                    <tr style="border-bottom: 2px solid #ddd;">
-                        <th style="text-align: left; padding: 8px;">Description</th>
-                        <th style="text-align: right; padding: 8px;">Qty</th>
-                        <th style="text-align: right; padding: 8px;">Price</th>
-                        <th style="text-align: right; padding: 8px;">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${invoiceData.line_items.map(item => `
-                        <tr style="border-bottom: 1px solid #eee;">
-                            <td style="padding: 8px;">${item.description}</td>
-                            <td style="text-align: right; padding: 8px;">${item.quantity}</td>
-                            <td style="text-align: right; padding: 8px;">$${item.unit_price.toFixed(2)}</td>
-                            <td style="text-align: right; padding: 8px;">$${item.total.toFixed(2)}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
+            <div style="margin-top: 32px;">
+                <h3 style="font-size: 16px; color: #FFFFFF; margin-bottom: 16px; font-weight: 500;">Line Items</h3>
+                <div style="border: 1px solid #1A1A1A; border-radius: 8px; overflow: hidden;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #111111;">
+                                <th style="text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 500; color: #888888; text-transform: uppercase; letter-spacing: 0.05em;">Description</th>
+                                <th style="text-align: right; padding: 12px 16px; font-size: 12px; font-weight: 500; color: #888888; text-transform: uppercase; letter-spacing: 0.05em;">Qty</th>
+                                <th style="text-align: right; padding: 12px 16px; font-size: 12px; font-weight: 500; color: #888888; text-transform: uppercase; letter-spacing: 0.05em;">Price</th>
+                                <th style="text-align: right; padding: 12px 16px; font-size: 12px; font-weight: 500; color: #888888; text-transform: uppercase; letter-spacing: 0.05em;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${invoiceData.line_items.map((item, index) => `
+                                <tr style="border-top: 1px solid #1A1A1A; ${index % 2 === 0 ? 'background: #0A0A0A;' : 'background: #000000;'}">
+                                    <td style="padding: 14px 16px; font-size: 13px; color: #EDEDED;">${item.description}</td>
+                                    <td style="text-align: right; padding: 14px 16px; font-size: 13px; color: #EDEDED; font-family: ui-monospace, monospace;">${item.quantity || '-'}</td>
+                                    <td style="text-align: right; padding: 14px 16px; font-size: 13px; color: #EDEDED; font-family: ui-monospace, monospace;">${item.unit_price ? '$' + item.unit_price.toFixed(2) : '-'}</td>
+                                    <td style="text-align: right; padding: 14px 16px; font-size: 13px; color: #FFFFFF; font-family: ui-monospace, monospace; font-weight: 500;">${item.total ? '$' + item.total.toFixed(2) : '$0.00'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         `
-        : '<p style="color: #666;">No line items detected</p>';
+        : '<p style="color: #888888; font-size: 14px; margin-top: 24px; padding: 24px; border: 1px dashed #1A1A1A; border-radius: 8px; text-align: center;">No line items detected</p>';
 
     content.innerHTML = `
-        <h2 style="margin-top: 0;">Invoice Extracted Successfully</h2>
-        <div style="margin: 20px 0;">
-            <p><strong>Vendor:</strong> ${invoiceData.vendor}</p>
-            <p><strong>Invoice Number:</strong> ${invoiceData.invoice_number || 'Not detected'}</p>
-            <p><strong>Date:</strong> ${invoiceData.date || 'Not detected'}</p>
-            <p><strong>Total Amount:</strong> $${invoiceData.amounts.total?.toFixed(2) || '0.00'}</p>
-            ${invoiceData.amounts.subtotal ? `<p><strong>Subtotal:</strong> $${invoiceData.amounts.subtotal.toFixed(2)}</p>` : ''}
-            ${invoiceData.amounts.tax ? `<p><strong>Tax:</strong> $${invoiceData.amounts.tax.toFixed(2)}</p>` : ''}
-            <p><strong>Confidence:</strong> ${(invoiceData.confidence * 100).toFixed(0)}%</p>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px;">
+            <div>
+                <h2 style="font-size: 24px; color: #FFFFFF; margin: 0 0 8px 0; font-weight: 500; letter-spacing: -0.02em;">Invoice Extracted</h2>
+                <p style="font-size: 14px; color: #888888; margin: 0;">OCR processing completed successfully</p>
+            </div>
+            <div style="background: ${invoiceData.confidence >= 0.8 ? 'rgba(18, 183, 106, 0.1)' : invoiceData.confidence >= 0.6 ? 'rgba(59, 130, 246, 0.1)' : 'rgba(245, 166, 35, 0.1)'};
+                        color: ${invoiceData.confidence >= 0.8 ? '#12b76a' : invoiceData.confidence >= 0.6 ? '#3b82f6' : '#f5a623'};
+                        padding: 6px 12px;
+                        border-radius: 6px;
+                        font-size: 13px;
+                        font-weight: 600;
+                        font-family: ui-monospace, monospace;">
+                ${(invoiceData.confidence * 100).toFixed(0)}% Confidence
+            </div>
         </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 24px;">
+            <div style="background: #111111; border: 1px solid #1A1A1A; border-radius: 8px; padding: 20px;">
+                <div style="font-size: 12px; color: #888888; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500;">Vendor</div>
+                <div style="font-size: 16px; color: #FFFFFF; font-weight: 500;">${invoiceData.vendor || 'Not detected'}</div>
+            </div>
+            <div style="background: #111111; border: 1px solid #1A1A1A; border-radius: 8px; padding: 20px;">
+                <div style="font-size: 12px; color: #888888; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500;">Invoice Number</div>
+                <div style="font-size: 16px; color: #FFFFFF; font-weight: 500; font-family: ui-monospace, monospace;">${invoiceData.invoice_number || 'Not detected'}</div>
+            </div>
+            <div style="background: #111111; border: 1px solid #1A1A1A; border-radius: 8px; padding: 20px;">
+                <div style="font-size: 12px; color: #888888; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500;">Date</div>
+                <div style="font-size: 16px; color: #FFFFFF; font-weight: 500;">${invoiceData.date || 'Not detected'}</div>
+            </div>
+            <div style="background: #111111; border: 1px solid #1A1A1A; border-radius: 8px; padding: 20px;">
+                <div style="font-size: 12px; color: #888888; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500;">Total Amount</div>
+                <div style="font-size: 24px; color: #FFFFFF; font-weight: 500; font-family: ui-monospace, monospace;">$${invoiceData.amounts.total?.toFixed(2) || '0.00'}</div>
+                ${invoiceData.amounts.subtotal ? `<div style="font-size: 13px; color: #888888; margin-top: 8px;">Subtotal: $${invoiceData.amounts.subtotal?.toFixed(2) || '0.00'}</div>` : ''}
+                ${invoiceData.amounts.tax ? `<div style="font-size: 13px; color: #888888; margin-top: 4px;">Tax: $${invoiceData.amounts.tax?.toFixed(2) || '0.00'}</div>` : ''}
+            </div>
+        </div>
+
         ${lineItemsHtml}
-        <div style="margin-top: 20px;">
+
+        <div style="margin-top: 32px; display: flex; gap: 12px; justify-content: flex-end;">
             <button onclick="this.closest('div').parentElement.parentElement.remove()" style="
-                background: #667eea;
-                color: white;
+                background: #FFFFFF;
+                color: #000000;
                 border: none;
-                padding: 10px 20px;
-                border-radius: 5px;
+                padding: 12px 24px;
+                border-radius: 6px;
                 cursor: pointer;
-                font-size: 16px;
-            ">Close</button>
+                font-size: 14px;
+                font-weight: 500;
+                transition: all 0.15s ease;
+            " onmouseover="this.style.background='#EAEAEA'" onmouseout="this.style.background='#FFFFFF'">
+                Close and View Dashboard
+            </button>
         </div>
     `;
 
@@ -229,15 +260,17 @@ async function handleFileUpload(event) {
         }
 
         const result = await response.json();
-        uploadStatus.textContent = `✓ Processed ${result.transaction_count} transactions in ${result.processing_time_ms}ms`;
+        uploadStatus.textContent = `Processed ${result.transaction_count} transactions in ${result.processing_time_ms}ms`;
 
         // Load dashboard data
         await loadDashboard();
 
     } catch (error) {
-        uploadStatus.textContent = `✗ Error: ${error.message}`;
+        uploadStatus.textContent = `Error: ${error.message}`;
         console.error('Upload error:', error);
     }
+
+    event.target.value = '';
 }
 
 // T051: Load dashboard data from API
@@ -249,10 +282,13 @@ async function loadDashboard() {
         }
 
         dashboardData = await response.json();
+        allTransactions = [];
+        showingAllTransactions = false;
 
         // Hide empty state, show dashboard
         document.getElementById('emptyState').style.display = 'none';
         document.getElementById('dashboardContent').style.display = 'block';
+        document.getElementById('toggleAnomalies').textContent = 'Show All Transactions';
 
         // Render all sections
         renderKeyMetrics(dashboardData.summary);
@@ -265,6 +301,34 @@ async function loadDashboard() {
         console.error('Dashboard load error:', error);
         alert('Failed to load dashboard: ' + error.message);
     }
+}
+
+function formatDate(dateValue) {
+    if (!dateValue) return '-';
+
+    const parsedDate = new Date(dateValue);
+    if (!Number.isNaN(parsedDate.getTime())) {
+        return parsedDate.toLocaleDateString('en-CA');
+    }
+
+    return String(dateValue).split('T')[0];
+}
+
+function formatVendorName(vendor) {
+    if (!vendor) return 'Unknown';
+    return vendor.charAt(0).toUpperCase() + vendor.slice(1);
+}
+
+async function fetchAllTransactions() {
+    const response = await fetch(`${API_BASE}/transactions?limit=10000`);
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to load transactions');
+    }
+
+    const result = await response.json();
+    return result.transactions || [];
 }
 
 // T052: Render key metrics section
@@ -481,15 +545,15 @@ function renderAnomalies(anomalies) {
 
         const reasons = Array.isArray(anomaly.anomaly_reasons)
             ? anomaly.anomaly_reasons.join('; ')
-            : anomaly.anomaly_reasons;
+            : (anomaly.anomaly_reasons || 'No anomaly reasons');
 
         row.innerHTML = `
-            <td>${anomaly.date}</td>
-            <td>${anomaly.vendor.charAt(0).toUpperCase() + anomaly.vendor.slice(1)}</td>
+            <td>${formatDate(anomaly.date)}</td>
+            <td>${formatVendorName(anomaly.vendor)}</td>
             <td>$${anomaly.amount_float.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-            <td>${anomaly.category}</td>
+            <td>${anomaly.category || 'Uncategorized'}</td>
             <td><span class="score-badge ${scoreClass}">${anomaly.anomaly_score}/10</span></td>
-            <td><span class="confidence-badge ${confidenceClass}">${anomaly.confidence}</span></td>
+            <td><span class="confidence-badge ${confidenceClass}">${anomaly.confidence || '-'}</span></td>
             <td class="reasons-list">${reasons}</td>
         `;
 
@@ -499,6 +563,9 @@ function renderAnomalies(anomalies) {
 
 // T057: Filter anomaly table by insight click
 function filterAnomaliesByInsight(insight) {
+    showingAllTransactions = false;
+    document.getElementById('toggleAnomalies').textContent = 'Show All Transactions';
+
     // Extract category from insight title if it's a cost spike
     if (insight.type === 'cost_spike') {
         const category = insight.title.split(' spending')[0];
@@ -514,15 +581,37 @@ function filterAnomaliesByInsight(insight) {
 }
 
 // Toggle between anomalies and all transactions
-function toggleAnomaliesView() {
+async function toggleAnomaliesView() {
     const btn = document.getElementById('toggleAnomalies');
-    if (btn.textContent.includes('All')) {
-        // Show all transactions (not implemented in MVP - would need to fetch from /transactions)
-        btn.textContent = 'Show Only Anomalies';
-    } else {
-        // Show only anomalies
+
+    if (!dashboardData) {
+        return;
+    }
+
+    if (showingAllTransactions) {
         renderAnomalies(dashboardData.anomalies);
+        showingAllTransactions = false;
         btn.textContent = 'Show All Transactions';
+        return;
+    }
+
+    try {
+        btn.disabled = true;
+        btn.textContent = 'Loading transactions...';
+
+        if (allTransactions.length === 0) {
+            allTransactions = await fetchAllTransactions();
+        }
+
+        renderAnomalies(allTransactions);
+        showingAllTransactions = true;
+        btn.textContent = 'Show Only Anomalies';
+    } catch (error) {
+        btn.textContent = 'Show All Transactions';
+        console.error('Transaction toggle error:', error);
+        alert('Failed to load transactions: ' + error.message);
+    } finally {
+        btn.disabled = false;
     }
 }
 
@@ -559,7 +648,8 @@ async function dismissAction(actionId) {
         });
 
         if (!response.ok) {
-            throw new Error('Dismiss failed');
+            const error = await response.json();
+            throw new Error(error.detail || 'Dismiss failed');
         }
 
         // Reload dashboard to show updated action status

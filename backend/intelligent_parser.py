@@ -8,6 +8,7 @@ from typing import Dict, List, Tuple, Optional
 import numpy as np
 from dataclasses import dataclass
 from collections import defaultdict
+from dateutil import parser as date_parser
 
 
 @dataclass
@@ -47,6 +48,18 @@ class IntelligentInvoiceParser:
 
         # Currency symbols
         self.currency_symbols = ['$', '€', '£', '¥', '₹', 'USD', 'EUR', 'GBP']
+        self.header_noise_patterns = [
+            r'^---\s*page\b',
+            r'^page\s+\d+',
+            r'^invoice\b',
+            r'^date\b',
+            r'^bill\s+to\b',
+            r'^ship\s+to\b',
+            r'^customer\b',
+            r'^subtotal\b',
+            r'^tax\b',
+            r'^total\b',
+        ]
 
     def parse_invoice_with_layout(self, text: str, ocr_data: Optional[Dict] = None) -> Dict:
         """
@@ -60,7 +73,10 @@ class IntelligentInvoiceParser:
             Structured invoice data
         """
         # Split into lines
-        lines = [line.strip() for line in text.split('\n') if line.strip()]
+        lines = [
+            line.strip() for line in text.split('\n')
+            if line.strip() and not re.match(r'^---\s*page\s+\d+\s*---$', line.strip(), re.IGNORECASE)
+        ]
 
         # Identify sections
         sections = self._identify_sections(lines)
@@ -91,6 +107,7 @@ class IntelligentInvoiceParser:
     def _identify_sections(self, lines: List[str]) -> Dict[str, List[str]]:
         """
         Identify different sections of invoice (header, items, footer)
+        Improved to detect table headers and structure
         """
         sections = {
             'header': [],
@@ -105,10 +122,21 @@ class IntelligentInvoiceParser:
             line_lower = line.lower()
 
             # Detect start of line items section
+            # Look for table headers like "Description | Qty | Price | Total"
             if any(header in line_lower for header in self.description_headers + self.quantity_headers):
                 current_section = 'items'
                 item_section_started = True
                 continue
+
+            # Also detect table structure by looking for multiple column-like words
+            if not item_section_started and i < 20:  # Check first 20 lines
+                # Count potential column headers
+                column_indicators = ['description', 'item', 'qty', 'quantity', 'price', 'amount', 'total']
+                matches = sum(1 for indicator in column_indicators if indicator in line_lower)
+                if matches >= 3:  # If 3+ column headers found
+                    current_section = 'items'
+                    item_section_started = True
+                    continue
 
             # Detect end of line items (totals section)
             if item_section_started and any(keyword in line_lower for keyword in ['subtotal', 'total', 'tax', 'amount due']):
@@ -123,14 +151,18 @@ class IntelligentInvoiceParser:
         info = {}
 
         # Vendor is usually in first few lines
-        if header_lines:
-            # First non-empty line is often vendor
-            info['vendor'] = header_lines[0] if header_lines else None
+        for line in header_lines:
+            if self._is_header_noise(line):
+                continue
+            if len(line) < 4:
+                continue
+            info['vendor'] = line
+            break
 
         # Invoice number patterns
         invoice_patterns = [
-            r'invoice\s*(?:no|number|#)?\s*:?\s*([A-Z0-9-]+)',
-            r'inv\s*(?:no|#)?\s*:?\s*([A-Z0-9-]+)',
+            r'(?:invoice|invoic[eos]|inv)\s*(?:no|number|#)?\s*[:#]?\s*([A-Z0-9][A-Z0-9-]{2,})',
+            r'(?:reference|ref|doc(?:ument)?|bill)\s*(?:no|number|#)?\s*[:#]?\s*([A-Z0-9][A-Z0-9-]{2,})',
             r'bill\s*(?:no|#)?\s*:?\s*([A-Z0-9-]+)',
         ]
 
@@ -145,14 +177,15 @@ class IntelligentInvoiceParser:
         date_patterns = [
             r'date\s*:?\s*(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})',
             r'(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})',
-            r'(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{1,2},?\s+\d{4}',
+            r'((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{1,2},?\s+\d{4})',
+            r'((?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2},?\s+\d{4})',
         ]
 
         for line in header_lines:
             for pattern in date_patterns:
                 match = re.search(pattern, line, re.IGNORECASE)
                 if match:
-                    info['date'] = match.group(1)
+                    info['date'] = self._normalize_date(match.group(1))
                     break
 
         return info
@@ -171,6 +204,9 @@ class IntelligentInvoiceParser:
         for line in item_lines:
             # Skip header lines
             if any(header in line.lower() for header in self.description_headers + self.quantity_headers):
+                continue
+
+            if self._is_non_item_line(line):
                 continue
 
             # Skip empty or very short lines
@@ -214,6 +250,11 @@ class IntelligentInvoiceParser:
         if total is None:
             total = numbers[-1]  # Last number is usually total
 
+        if qty and unit_price and total:
+            calculated_total = round(qty * unit_price, 2)
+            if total > 0 and abs(calculated_total - total) / total < 0.05:
+                total = calculated_total
+
         # Calculate confidence
         confidence = self._calculate_item_confidence(description, qty, unit_price, total, line)
 
@@ -235,8 +276,13 @@ class IntelligentInvoiceParser:
         numbers = []
         for match in matches:
             try:
-                # Remove commas and convert
-                num = float(match.replace(',', ''))
+                normalized = match.replace(',', '')
+                if '.' not in normalized and len(normalized) >= 4 and (
+                    '$' in text or re.search(r'\d+\.\d{2}', text)
+                ):
+                    num = float(normalized) / 100
+                else:
+                    num = float(normalized)
                 if num > 0:  # Only positive numbers
                     numbers.append(num)
             except ValueError:
@@ -247,7 +293,7 @@ class IntelligentInvoiceParser:
     def _identify_number_roles(self, numbers: List[float], line: str) -> Tuple[Optional[float], Optional[float], Optional[float]]:
         """
         Identify which number is quantity, unit price, and total
-        Uses heuristics and context
+        Uses improved heuristics and validation
         """
         if len(numbers) == 0:
             return None, None, None
@@ -258,27 +304,41 @@ class IntelligentInvoiceParser:
 
         if len(numbers) == 2:
             # Two numbers - could be qty+total or price+total
-            # If first number is small (< 100), likely quantity
-            if numbers[0] < 100 and numbers[1] > numbers[0]:
-                return numbers[0], None, numbers[1]
+            # Use position in line to help determine
+            first_num, second_num = numbers[0], numbers[1]
+
+            # If first number is small (< 100) and second is larger, likely qty+total
+            if first_num < 100 and second_num > first_num * 2:
+                return first_num, None, second_num
+            # If first number is in reasonable price range, likely price+total
+            elif first_num > 1 and first_num < second_num:
+                return None, first_num, second_num
             else:
-                # Both are prices (unit price and total)
-                return None, numbers[0], numbers[1]
+                # Default: second number is total
+                return None, None, second_num
 
         if len(numbers) == 3:
-            # Three numbers - qty, unit price, total
-            # Validate: qty * unit_price ≈ total
+            # Three numbers - likely qty, unit price, total
             qty, price, total = numbers[0], numbers[1], numbers[2]
 
-            # Check if multiplication makes sense
-            if abs(qty * price - total) / total < 0.1:  # Within 10%
-                return qty, price, total
-            else:
-                # Maybe first is item number, not qty
-                return numbers[1], numbers[2], numbers[2]
+            # Validate: qty * price ≈ total (within 5% instead of 10%)
+            if qty > 0 and price > 0:
+                calculated = qty * price
+                diff_pct = abs(calculated - total) / total if total > 0 else 1.0
+
+                if diff_pct < 0.05:  # Within 5%
+                    return qty, price, total
+
+            # Validation failed - maybe first number is item number, not qty
+            # Try second and third as price and total
+            if numbers[1] < numbers[2]:
+                return None, numbers[1], numbers[2]
+
+            # Last resort: just use last number as total
+            return None, None, numbers[-1]
 
         if len(numbers) >= 4:
-            # Multiple numbers - take last 3
+            # Multiple numbers - take last 3 and recurse
             return self._identify_number_roles(numbers[-3:], line)
 
         return None, None, numbers[-1]
@@ -301,8 +361,9 @@ class IntelligentInvoiceParser:
             confidence += 0.1
 
         # Qty * price ≈ total
-        if qty and unit_price and abs(qty * unit_price - total) / total < 0.05:
-            confidence += 0.2
+        if qty and unit_price and total and total > 0:
+            if abs(qty * unit_price - total) / total < 0.05:
+                confidence += 0.2
 
         return min(confidence, 1.0)
 
@@ -333,7 +394,7 @@ class IntelligentInvoiceParser:
 
     def _validate_line_items(self, line_items: List[LineItem], totals: Dict[str, float]) -> List[Dict]:
         """
-        Validate line items against totals
+        Validate line items against totals with tighter tolerance
         Remove invalid items
         """
         validated = []
@@ -344,22 +405,25 @@ class IntelligentInvoiceParser:
         # Check if sum matches invoice total
         invoice_total = totals.get('total') or totals.get('subtotal')
 
-        if invoice_total:
-            # If items total is close to invoice total, good
-            if abs(items_total - invoice_total) / invoice_total < 0.1:
-                # All items are valid
+        if invoice_total and invoice_total > 0:
+            diff_pct = abs(items_total - invoice_total) / invoice_total
+
+            # Tighter tolerance: 5% instead of 10%
+            if diff_pct < 0.05:
+                # Items sum matches total - include all items
                 for item in line_items:
                     validated.append({
                         'description': item.description,
                         'quantity': item.quantity,
                         'unit_price': item.unit_price,
                         'total': item.total_price,
-                        'confidence': min(item.confidence + 0.1, 1.0)  # Boost confidence
+                        'confidence': item.confidence
                     })
             else:
-                # Some items might be invalid - use confidence scores
+                # Items don't match - filter by confidence
+                # Only include items with confidence > 0.6
                 for item in line_items:
-                    if item.confidence > 0.6:  # Only include confident items
+                    if item.confidence > 0.6:
                         validated.append({
                             'description': item.description,
                             'quantity': item.quantity,
@@ -368,40 +432,107 @@ class IntelligentInvoiceParser:
                             'confidence': item.confidence
                         })
         else:
-            # No total to validate against - include all items
+            # No total to validate against - include all items with confidence > 0.5
             for item in line_items:
-                validated.append({
-                    'description': item.description,
-                    'quantity': item.quantity,
-                    'unit_price': item.unit_price,
-                    'total': item.total_price,
-                    'confidence': item.confidence
-                })
+                if item.confidence > 0.5:
+                    validated.append({
+                        'description': item.description,
+                        'quantity': item.quantity,
+                        'unit_price': item.unit_price,
+                        'total': item.total_price,
+                        'confidence': item.confidence
+                    })
 
         return validated
 
     def _calculate_confidence(self, header_info: Dict, line_items: List[Dict], totals: Dict) -> float:
-        """Calculate overall extraction confidence"""
-        confidence_factors = []
+        """
+        Calculate overall extraction confidence with weighted scoring
 
-        # Header info
-        if header_info.get('vendor'):
-            confidence_factors.append(0.9)
-        if header_info.get('invoice_number'):
-            confidence_factors.append(0.9)
-        if header_info.get('date'):
-            confidence_factors.append(0.9)
+        Weights:
+        - Vendor: 25%
+        - Total amount: 30%
+        - Line items: 25%
+        - Invoice number: 10%
+        - Date: 10%
+        """
+        confidence_scores = {}
 
-        # Line items
+        # Vendor (25% weight)
+        if header_info.get('vendor') and len(header_info['vendor']) > 3:
+            confidence_scores['vendor'] = 0.9
+        else:
+            confidence_scores['vendor'] = 0.3
+
+        # Total amount (30% weight)
+        if totals.get('total') and totals['total'] > 0:
+            # Boost confidence if subtotal + tax = total
+            if totals.get('subtotal') and totals.get('tax'):
+                calculated = totals['subtotal'] + totals['tax']
+                diff_pct = abs(calculated - totals['total']) / totals['total']
+                if diff_pct < 0.02:  # Within 2%
+                    confidence_scores['total'] = 0.95
+                else:
+                    confidence_scores['total'] = 0.85
+            else:
+                confidence_scores['total'] = 0.9
+        else:
+            confidence_scores['total'] = 0.3
+
+        # Line items (25% weight)
         if line_items:
             avg_item_confidence = np.mean([item['confidence'] for item in line_items])
-            confidence_factors.append(avg_item_confidence)
+            confidence_scores['line_items'] = avg_item_confidence
+        else:
+            confidence_scores['line_items'] = 0.4
 
-        # Totals
-        if totals.get('total'):
-            confidence_factors.append(0.95)
+        # Invoice number (10% weight)
+        if header_info.get('invoice_number'):
+            confidence_scores['invoice_number'] = 0.9
+        else:
+            confidence_scores['invoice_number'] = 0.5
 
-        return np.mean(confidence_factors) if confidence_factors else 0.3
+        # Date (10% weight)
+        if header_info.get('date'):
+            confidence_scores['date'] = 0.9
+        else:
+            confidence_scores['date'] = 0.5
+
+        # Calculate weighted average
+        weights = {
+            'vendor': 0.25,
+            'total': 0.30,
+            'line_items': 0.25,
+            'invoice_number': 0.10,
+            'date': 0.10
+        }
+
+        weighted_confidence = sum(
+            confidence_scores.get(key, 0.3) * weight
+            for key, weight in weights.items()
+        )
+
+        return float(weighted_confidence)
+
+    def _normalize_date(self, raw_date: str) -> Optional[str]:
+        """Normalize a detected date to ISO format when possible."""
+        try:
+            parsed = date_parser.parse(raw_date, fuzzy=True)
+            return parsed.strftime('%Y-%m-%d')
+        except Exception:
+            return raw_date
+
+    def _is_header_noise(self, line: str) -> bool:
+        """Return True when a line is not a trustworthy header value."""
+        line_lower = line.lower().strip()
+        return any(re.match(pattern, line_lower, re.IGNORECASE) for pattern in self.header_noise_patterns)
+
+    def _is_non_item_line(self, line: str) -> bool:
+        """Return True when a line should not be treated as a line item."""
+        line_lower = line.lower().strip()
+        if self._is_header_noise(line):
+            return True
+        return bool(re.match(r'^(invoice|date|bill\s+to|customer|reference|ref)\b', line_lower))
 
 
 # Integration with existing InvoiceOCR class

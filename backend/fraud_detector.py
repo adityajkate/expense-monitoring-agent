@@ -169,13 +169,13 @@ class FraudDetector:
         alerts = []
 
         amounts = invoice.get('amounts', {})
-        total = amounts.get('total', 0)
+        total = amounts.get('total') or 0
         subtotal = amounts.get('subtotal')
         tax = amounts.get('tax')
         line_items = invoice.get('line_items', [])
 
         # Check if amounts are suspiciously round
-        if total >= self.suspicious_round_amount_threshold:
+        if total and total >= self.suspicious_round_amount_threshold:
             if total % 100 == 0 or total % 1000 == 0:
                 alerts.append(FraudAlert(
                     alert_id=self._generate_alert_id(),

@@ -1,5 +1,6 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from typing import Optional, List, Dict, Any
 import pandas as pd
 import numpy as np
@@ -65,6 +66,8 @@ CACHE = {
 
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """T013: Clean and validate transaction data"""
+    df = df.copy()
+
     # Add description column if missing
     if "description" not in df.columns:
         df["description"] = ""
@@ -75,12 +78,81 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     df = df[df["amount"] > 0]
 
     # Normalize vendor names (lowercase, trimmed)
-    df["vendor"] = df["vendor"].str.lower().str.strip()
-
-    # Add unique ID
-    df["id"] = [f"txn_{i:03d}" for i in range(len(df))]
+    df["vendor"] = df["vendor"].astype(str).str.lower().str.strip()
 
     return df.reset_index(drop=True)
+
+
+def assign_transaction_ids(df: pd.DataFrame, start_index: int = 0) -> pd.DataFrame:
+    """Assign stable transaction IDs starting from a given index."""
+    df = df.copy()
+    df["id"] = [f"txn_{i:03d}" for i in range(start_index, start_index + len(df))]
+    return df
+
+
+def get_next_transaction_index() -> int:
+    """Return the next available transaction index from cached transactions."""
+    df = CACHE["df"]
+
+    if df is None or df.empty or "id" not in df.columns:
+        return 0
+
+    ids = (
+        df["id"]
+        .astype(str)
+        .str.extract(r"txn_(\d+)", expand=False)
+        .dropna()
+    )
+
+    if ids.empty:
+        return len(df)
+
+    return int(ids.astype(int).max()) + 1
+
+
+def reset_cache(include_invoice_data: bool = True) -> None:
+    """Reset the in-memory cache used by the API."""
+    CACHE["df"] = None
+    CACHE["raw_df"] = None
+    CACHE["summary"] = {}
+    CACHE["insights"] = []
+    CACHE["anomalies"] = []
+    CACHE["actions"] = []
+    CACHE["metadata"] = {}
+
+    if include_invoice_data:
+        CACHE["invoices"] = []
+        CACHE["invoice_matches"] = {}
+        CACHE["fraud_alerts"] = []
+
+
+def serialize_value(value: Any) -> Any:
+    """Convert pandas/numpy values into JSON-safe Python values."""
+    if isinstance(value, list):
+        return [serialize_value(item) for item in value]
+
+    if isinstance(value, dict):
+        return {key: serialize_value(item) for key, item in value.items()}
+
+    if isinstance(value, np.generic):
+        value = value.item()
+
+    if pd.isna(value):
+        return None
+
+    if isinstance(value, (pd.Timestamp, datetime)):
+        return value.strftime("%Y-%m-%d")
+
+    return value
+
+
+def serialize_records(df: pd.DataFrame) -> List[Dict[str, Any]]:
+    """Serialize a dataframe into JSON-safe records."""
+    records = df.to_dict("records")
+    return [
+        {key: serialize_value(value) for key, value in record.items()}
+        for record in records
+    ]
 
 
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -409,7 +481,7 @@ def generate_anomaly_summary(df: pd.DataFrame, total_spend: float) -> List[Dict[
             "type": "anomaly_summary",
             "severity": severity,
             "title": f"{high_risk_count} high-risk transactions detected ({percentage:.1f}% of total)",
-            "description": f"Detected {high_risk_count} high-risk anomalies out of {total_count} transactions ({percentage:.1f}%). These transactions have anomaly scores ≥8 and require immediate review. Total value: ${impact_amount:,.2f}.",
+            "description": f"Detected {high_risk_count} high-risk anomalies out of {total_count} transactions ({percentage:.1f}%). These transactions have anomaly scores >= 8 and require immediate review. Total value: ${impact_amount:,.2f}.",
             "impact_amount": impact_amount,
             "importance_score": importance_score
         })
@@ -570,6 +642,20 @@ async def upload_invoice(file: UploadFile = File(...)):
                 status_code=503,
                 detail=str(e) + " Please install Tesseract OCR. See TESSERACT_INSTALL.md"
             )
+        except Exception as e:
+            # Log the full error for debugging
+            import traceback
+            import sys
+            error_trace = traceback.format_exc()
+            print("=" * 80, file=sys.stderr)
+            print("ERROR in extract_invoice_data:", file=sys.stderr)
+            print(error_trace, file=sys.stderr)
+            print("=" * 80, file=sys.stderr)
+            sys.stderr.flush()
+            raise HTTPException(
+                status_code=500,
+                detail=f"Invoice processing failed: {str(e)}"
+            )
 
         processing_time = int((datetime.now() - start_time).total_seconds() * 1000)
 
@@ -630,50 +716,65 @@ async def upload_invoice(file: UploadFile = File(...)):
         # Store invoice
         CACHE["invoices"].append(invoice_data)
 
-        # Add to transactions if we have existing data
-        if CACHE["df"] is not None:
-            # Create new transaction row
-            new_row = pd.DataFrame([transaction])
+        # Add to transactions - create initial dataframe if needed
+        if CACHE["df"] is None:
+            # Initialize empty dataframe with proper structure
+            CACHE["df"] = pd.DataFrame(columns=['date', 'vendor', 'amount', 'description'])
+            CACHE["raw_df"] = CACHE["df"].copy()
 
-            # Process it through the pipeline
-            new_row = clean_data(new_row)
-            new_row = engineer_features(new_row)
-            new_row = categorize_transactions(new_row)
-            new_row = detect_anomalies(new_row)
-            new_row = assign_anomaly_scores(new_row)
-            new_row = generate_explanations(new_row)
+        # Create new transaction row
+        new_row = pd.DataFrame([transaction])
 
-            # Append to existing data
-            CACHE["df"] = pd.concat([CACHE["df"], new_row], ignore_index=True)
+        # Process it through the pipeline
+        new_row = clean_data(new_row)
+        new_row = assign_transaction_ids(new_row, start_index=get_next_transaction_index())
+        new_row = engineer_features(new_row)
+        new_row = categorize_transactions(new_row)
+        new_row = detect_anomalies(new_row)
+        new_row = assign_anomaly_scores(new_row)
+        new_row = generate_explanations(new_row)
 
-            # Regenerate insights and actions
-            CACHE["insights"] = generate_insights(CACHE["df"])
-            CACHE["actions"] = generate_actions(CACHE["df"], CACHE["insights"])
+        # Append to existing data
+        CACHE["df"] = pd.concat([CACHE["df"], new_row], ignore_index=True)
 
-            # Update anomalies
-            anomalies_df = CACHE["df"][CACHE["df"]["is_anomaly"]].copy()
-            CACHE["anomalies"] = anomalies_df.to_dict("records")
+        # Regenerate insights and actions
+        CACHE["insights"] = generate_insights(CACHE["df"])
+        CACHE["actions"] = generate_actions(CACHE["df"], CACHE["insights"])
 
-            # Match invoice to transactions
-            match_result = invoice_matcher.match_invoices_to_transactions(
-                invoices=[invoice_data],
-                transactions=CACHE["df"]
+        # Update anomalies
+        anomalies_df = CACHE["df"][CACHE["df"]["is_anomaly"]].copy()
+        CACHE["anomalies"] = serialize_records(anomalies_df)
+
+        # Update summary
+        CACHE["summary"] = {
+            "total_transactions": len(CACHE["df"]),
+            "total_spend": float(CACHE["df"]["amount"].sum()),
+            "date_range": {
+                "start": str(CACHE["df"]["date"].min()),
+                "end": str(CACHE["df"]["date"].max())
+            }
+        }
+
+        # Match invoice to transactions
+        match_result = invoice_matcher.match_invoices_to_transactions(
+            invoices=[invoice_data],
+            transactions=CACHE["df"]
+        )
+
+        # Store match results
+        if match_result['matches']:
+            match = match_result['matches'][0]
+            CACHE["invoice_matches"][file_hash] = match
+
+            # Log the match
+            audit_trail.log_invoice_match(
+                invoice_id=file_hash,
+                transaction_id=match['transaction_id'],
+                match_score=match['match_score'],
+                match_type=match['match_type']
             )
 
-            # Store match results
-            if match_result['matches']:
-                match = match_result['matches'][0]
-                CACHE["invoice_matches"][file_hash] = match
-
-                # Log the match
-                audit_trail.log_invoice_match(
-                    invoice_id=file_hash,
-                    transaction_id=match['transaction_id'],
-                    match_score=match['match_score'],
-                    match_type=match['match_type']
-                )
-
-            invoice_data['match_result'] = match_result
+        invoice_data['match_result'] = match_result
 
         return {
             "status": "success",
@@ -684,6 +785,8 @@ async def upload_invoice(file: UploadFile = File(...)):
             "message": f"Invoice processed successfully. Confidence: {invoice_data['confidence']:.0%}, Risk: {fraud_result['risk_level']}"
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Invoice processing failed: {str(e)}")
 
@@ -845,6 +948,8 @@ async def export_audit_log(
             "file_path": file_path,
             "message": f"Audit log exported to {file_path}"
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
 
@@ -852,16 +957,7 @@ async def export_audit_log(
 @app.post("/clear")
 async def clear_cache():
     """Clear all cached data"""
-    CACHE["df"] = None
-    CACHE["raw_df"] = None
-    CACHE["summary"] = {}
-    CACHE["insights"] = []
-    CACHE["anomalies"] = []
-    CACHE["actions"] = []
-    CACHE["metadata"] = {}
-    CACHE["invoices"] = []
-    CACHE["invoice_matches"] = {}
-    CACHE["fraud_alerts"] = []
+    reset_cache()
     return {"status": "cleared", "message": "All data cleared"}
 
 
@@ -880,14 +976,8 @@ async def upload_csv(file: UploadFile = File(...)):
 
         # Allow re-upload by clearing cache if same file
         if CACHE["metadata"].get("file_hash") == file_hash:
-            # Clear cache to allow re-processing
-            CACHE["df"] = None
-            CACHE["raw_df"] = None
-            CACHE["summary"] = {}
-            CACHE["insights"] = []
-            CACHE["anomalies"] = []
-            CACHE["actions"] = []
-            CACHE["metadata"] = {}
+            # Clear transaction analysis state to allow re-processing
+            reset_cache(include_invoice_data=False)
 
         # Parse CSV
         df = pd.read_csv(io.BytesIO(content))
@@ -931,6 +1021,12 @@ async def upload_csv(file: UploadFile = File(...)):
 
         # T013: CSV parsing and cleaning
         df = clean_data(df)
+        if len(df) < 10:
+            raise HTTPException(
+                status_code=400,
+                detail="No valid transactions found (minimum 10 required)"
+            )
+        df = assign_transaction_ids(df)
 
         # T014: Feature engineering
         df = engineer_features(df)
@@ -958,7 +1054,7 @@ async def upload_csv(file: UploadFile = File(...)):
 
         # Extract anomalies for cache
         anomalies_df = df[df["is_anomaly"]].copy()
-        CACHE["anomalies"] = anomalies_df.to_dict("records")
+        CACHE["anomalies"] = serialize_records(anomalies_df)
 
         # Calculate processing time
         processing_time = int((datetime.now() - start_time).total_seconds() * 1000)
@@ -981,6 +1077,8 @@ async def upload_csv(file: UploadFile = File(...)):
             "processing_time_ms": processing_time
         }
 
+    except HTTPException:
+        raise
     except pd.errors.EmptyDataError:
         raise HTTPException(status_code=400, detail="No valid transactions found")
     except Exception as e:
@@ -1071,12 +1169,7 @@ async def get_transactions(
     page_df = df.iloc[start_idx:end_idx]
 
     # Convert to records
-    transactions = page_df.to_dict("records")
-
-    # Convert date to string for JSON serialization
-    for txn in transactions:
-        if "date" in txn and pd.notna(txn["date"]):
-            txn["date"] = txn["date"].strftime("%Y-%m-%d")
+    transactions = serialize_records(page_df)
 
     return {
         "transactions": transactions,
@@ -1155,6 +1248,12 @@ async def dismiss_action(action_id: str):
     if not action:
         raise HTTPException(status_code=404, detail="Action not found")
 
+    if action["status"] == "dismissed":
+        raise HTTPException(status_code=400, detail="Action already dismissed")
+
+    if action["status"] == "executed":
+        raise HTTPException(status_code=400, detail="Action already executed")
+
     # Update action status
     action["status"] = "dismissed"
 
@@ -1165,10 +1264,13 @@ async def dismiss_action(action_id: str):
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     """Catch-all error handler for processing crashes"""
-    return {
-        "error": "Processing failed - please try again or contact support",
-        "detail": str(exc)
-    }
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "Processing failed - please try again or contact support",
+            "detail": str(exc)
+        }
+    )
 
 
 if __name__ == "__main__":
