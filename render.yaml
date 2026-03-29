@@ -2,11 +2,10 @@ services:
   # Backend API
   - type: web
     name: spendguard-api
-    env: python
+    env: docker
     region: oregon
     plan: free
-    buildCommand: "apt-get update && apt-get install -y tesseract-ocr poppler-utils && cd backend && pip install -r requirements.txt && python -m spacy download en_core_web_sm"
-    startCommand: "cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT"
+    dockerfilePath: ./Dockerfile
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
+      - key: PORT
+        value: 8000
