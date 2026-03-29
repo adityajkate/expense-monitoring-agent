@@ -1,5 +1,10 @@
 # SpendGuard AI - Autonomous Expense Monitoring Agent
 
+## 👨‍💻 Contributors
+
+- Aditya Kate
+- Tanmay Harmalkar
+
 AI agent that audits company spending and takes autonomous action
 
 ## Overview
@@ -248,4 +253,4 @@ MIT
 
 ## Support
 
-For issues or questions, refer to the code documentation or API docs at http://localhost:8000/docs
+For issues or questions, refer to the code documentation or API docs at http://localhost:8000/docs after running code locally :)
