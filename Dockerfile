@@ -23,8 +23,11 @@ RUN python -m spacy download en_core_web_sm
 COPY backend ./backend
 COPY frontend ./frontend
 
+# Set working directory to backend
+WORKDIR /app/backend
+
 # Expose port
 EXPOSE 8000
 
 # Start command
-CMD uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+CMD uvicorn main:app --host 0.0.0.0 --port $PORT
