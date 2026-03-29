@@ -10,24 +10,21 @@ RUN apt-get update && apt-get install -y \
     poppler-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy backend requirements
-COPY backend/requirements.txt /app/backend/requirements.txt
+# Copy backend requirements first (for better caching)
+COPY backend/requirements.txt ./requirements.txt
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r backend/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Download spaCy model
 RUN python -m spacy download en_core_web_sm
 
-# Copy application code
-COPY backend /app/backend
-COPY frontend /app/frontend
+# Copy all application code
+COPY backend ./backend
+COPY frontend ./frontend
 
-# Expose port
+# Expose port (Railway will set PORT env variable)
 EXPOSE 8000
 
-# Set working directory to backend
-WORKDIR /app/backend
-
-# Start the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Start the application from backend directory
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
