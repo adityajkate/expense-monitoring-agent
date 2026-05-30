@@ -248,7 +248,7 @@ python audit_trail.py
 ```
 
 ## License
-
+MIT
 MIT
 
 ## Support
